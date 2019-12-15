@@ -1,0 +1,20 @@
+# Ignore the following folders
+.idea/
+.deps/
+.libs/
+cmake-build-debug/
+
+# Ignore the following files
+.dirstamp
+*.la
+*.lo
+*.o
+CMakeLists.txt
+Makefile
+config.log
+config.status
+examples/moepeval
+examples/ptmbeacon
+examples/ptmsimple
+libtool
+libmoep80211.pc
