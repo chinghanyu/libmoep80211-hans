@@ -156,7 +156,12 @@ static int ieee80211_build_len(void *vhdr)
 	len += sizeof(hdr->duration_id);
 	len += sizeof(hdr->addr1);
 
-	if (ieee80211_is_mgmt(hdr->frame_control)) {
+	if (ieee80211_is_ctl(hdr->frame_control)) {
+		if (ieee80211_is_rts(hdr->frame_control)) {
+			len += sizeof(hdr->addr2);
+		}
+		len += sizeof(hdr->seq_ctrl);
+	} else if (ieee80211_is_mgmt(hdr->frame_control)) {
 		len += sizeof(hdr->addr2);
 		len += sizeof(hdr->addr3);
 		len += sizeof(hdr->seq_ctrl);
@@ -201,7 +206,29 @@ static int ieee80211_build(void *vhdr, u8 *raw, size_t maxlen)
 	len += sizeof(hdr->duration_id);
 	COPY_AND_CHANGE_DST(raw, hdr->addr1, maxlen);
 	len += sizeof(hdr->addr1);
-	if (ieee80211_is_mgmt(hdr->frame_control)) {
+	if (ieee80211_is_ctl(hdr->frame_control)) {
+		if (ieee80211_is_rts(hdr->frame_control)) {
+			// An RTS frame has only RA, TA, and FCS field after its duration field.
+			if (sizeof(hdr->addr2) + sizeof(hdr->seq_ctrl) > maxlen) {
+				errno = EMSGSIZE;
+				return -1;
+			}
+			COPY_AND_CHANGE_DST(raw, hdr->addr2, maxlen);
+			len += sizeof(hdr->addr2);
+			DEREF_AND_CHANGE(typeof(hdr->seq_ctrl), raw, maxlen) =
+					hdr->seq_ctrl;
+			len += sizeof(hdr->seq_ctrl);
+		} else if (ieee80211_is_cts(hdr->frame_control) || ieee80211_is_ack(hdr->frame_control)) {
+			// A CTS or an ACK frame has only RA and FCS field after its duration field.
+			if (sizeof(hdr->seq_ctrl) > maxlen) {
+				errno = EMSGSIZE;
+				return -1;
+			}
+			DEREF_AND_CHANGE(typeof(hdr->seq_ctrl), raw, maxlen) =
+					hdr->seq_ctrl;
+			len += sizeof(hdr->seq_ctrl);
+		}
+	} else if (ieee80211_is_mgmt(hdr->frame_control)) {
 		if (sizeof(hdr->addr2) + sizeof(hdr->addr3) +
 		    sizeof(hdr->seq_ctrl) > maxlen) {
 			errno = EMSGSIZE;
