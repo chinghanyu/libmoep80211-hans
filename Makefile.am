@@ -3,6 +3,8 @@ AM_DISTCHECK_CONFIGURE_FLAGS = --enable-examples
 
 AM_CFLAGS = -O2 -Wall -Wstrict-prototypes -Wmissing-prototypes -Wno-unused-function
 
+AM_LDFLAGS = -lm
+
 lib_LTLIBRARIES = libmoep80211.la
 
 libmoep80211_la_SOURCES  = src/dev.c
@@ -86,7 +88,7 @@ dist_man_MANS =
 
 
 if WANT_EXAMPLES
-bin_PROGRAMS += examples/moepeval examples/ptmsimple examples/ptmbeacon
+bin_PROGRAMS += examples/moepeval examples/ptmsimple examples/ptmbeacon examples/wakeupgen
 
 examples_moepeval_SOURCES = examples/moepeval.c
 examples_moepeval_LDADD = libmoep80211.la
@@ -99,6 +101,10 @@ examples_ptmsimple_CPPFLAGS = -I$(top_srcdir)/include
 examples_ptmbeacon_SOURCES = examples/ptmbeacon.c
 examples_ptmbeacon_LDADD = libmoep80211.la
 examples_ptmbeacon_CPPFLAGS = -I$(top_srcdir)/include
+
+examples_wakeupgen_SOURCES = examples/wakeupgen.c
+examples_wakeupgen_LDADD = libmoep80211.la
+examples_wakeupgen_CPPFLAGS = -I$(top_srcdir)/include
 
 dist_man_MANS += examples/moepeval.1
 dist_man_MANS += examples/ptmsimple.1
