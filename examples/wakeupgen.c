@@ -304,6 +304,8 @@ static int print_payload(unsigned char *payload, int len) {
 
 static u16 legacy_rate_worked;
 static u32 mcs_rate_worked;
+static u8 src_addr[IEEE80211_ALEN] = "\xde\xad\xbe\xef\x02\x01";
+static u8 dst_addr[IEEE80211_ALEN] = "\xde\xad\xbe\xef\x02\x02";
 
 static void rx_handler_work(moep_dev_t dev, moep_frame_t frame)
 {
@@ -338,14 +340,32 @@ static void rx_handler_work(moep_dev_t dev, moep_frame_t frame)
 		return;
 	}
 
-	// TODO validate payload
-
 	if (!(radiotap = moep_frame_radiotap(frame))) {
 		moep_frame_destroy(frame);
 		return;
 	}
+
+	if (memcmp(hdr->ra, dst_addr, IEEE80211_ALEN)) {
+		moep_frame_destroy(frame);
+		return;
+	}
+	if (memcmp(hdr->ta, src_addr, IEEE80211_ALEN)) {
+		moep_frame_destroy(frame);
+		return;
+	}
+
+	// TODO validate payload
+
+	/*
+	 * In our experiment, wakeupgen will send many packets meeting duration requirements. We need to verify these
+	 * packets. Say a pre-defined pattern includes packet durations of 152, 252, 352, and 452 us. How can we display
+	 * them?
+	 */
+
+	// legacy rates
 	if (radiotap->hdr.it_present & BIT(IEEE80211_RADIOTAP_RATE))
 		legacy_rate_worked |= BIT(legacy_idx(radiotap->rate));
+	// MCS rates
 	if ((radiotap->hdr.it_present & BIT(IEEE80211_RADIOTAP_MCS)) &&
 		(radiotap->mcs.known & IEEE80211_RADIOTAP_MCS_HAVE_MCS))
 		mcs_rate_worked |= BIT(radiotap->mcs.mcs);
@@ -433,8 +453,8 @@ static void test_data_rates_work(const char *send_if, const char *recv_if, u64 f
 		hdr->frame_control = htole16(IEEE80211_FTYPE_DATA | IEEE80211_STYPE_DATA);
 		/* Set source and destination MAC addresses so that we can tell which is which */
 		// TODO: find a way to set hardware MAC address to the packet
-		memcpy(hdr->ra, "\xde\xad\xbe\xef\x02\x01", sizeof(hdr->ra));
-		memcpy(hdr->ta, "\xde\xad\xbe\xef\x02\x02", sizeof(hdr->ta));
+		memcpy(hdr->ra, dst_addr, IEEE80211_ALEN);
+		memcpy(hdr->ta, src_addr, IEEE80211_ALEN);
 
 		if (!moep_frame_set_moep_hdr_ext(frames[i], &data_rate_hdr_pctrl.hdr))
 			goto out;
