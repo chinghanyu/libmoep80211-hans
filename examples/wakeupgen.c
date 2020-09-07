@@ -277,8 +277,8 @@ struct moep_hdr_pctrl data_rate_hdr_pctrl = {
 				.type = MOEP_HDR_PCTRL,							// 0x01
 				.len = sizeof(struct moep_hdr_pctrl),			// (8 + 8 + 16 + 16) = 48 bits = 6 bytes = 0x06
 		},
-		.type = htole16(0),									// 0x00, 0x00
-		.len = htole16(sizeof(data_rate_work_payload)),		// 12 bytes = 0x0c, 0x00, need to be updated
+		.type = cpu_to_le16(0),								// 0x00, 0x00
+		.len = cpu_to_le16(sizeof(data_rate_work_payload)),	// 12 bytes = 0x0c, 0x00, need to be updated
 };
 
 static unsigned char *gen_payload(size_t num_bytes) {

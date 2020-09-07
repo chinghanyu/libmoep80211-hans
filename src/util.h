@@ -21,7 +21,7 @@
 #define UTIL_H
 
 #include <time.h>
-
+#include <endian.h>
 
 #define max(x, y)				\
 	({					\
@@ -45,6 +45,16 @@
 
 #define BIT(x) (1ULL << (x))
 #define BIT_MASK(x) (BIT(x) - 1)
+
+#if __BYTE_ORDER__ == __LITTLE_ENDIAN
+#define cpu_to_le16(x)	(x)
+#define cpu_to_le32(x)	(x)
+#else
+#define cpu_to_le16(x)	((((x) >> 8u) & 0xffu) | (((x) & 0xffu) << 8u))
+#define cpu_to_le32(x) \
+		((((x) & 0xff000000u) >> 24u) | (((x) & 0x00ff0000u) >>  8u) | \
+		 (((x) & 0x0000ff00u) <<  8u) | (((x) & 0x000000ffu) << 24u))
+#endif
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 

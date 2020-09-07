@@ -22,7 +22,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <argp.h>
-#include <endian.h>
 
 #include <arpa/inet.h>
 
@@ -242,8 +241,8 @@ struct moep_hdr_pctrl data_rate_hdr_pctrl = {
 		.type = MOEP_HDR_PCTRL,
 		.len = sizeof(struct moep_hdr_pctrl),
 	},
-	.type = htole16(0),
-	.len = htole16(sizeof(data_rate_work_payload)),
+	.type = cpu_to_le16(0),
+	.len = cpu_to_le16(sizeof(data_rate_work_payload)),
 };
 
 static u16 legacy_rate_worked;
