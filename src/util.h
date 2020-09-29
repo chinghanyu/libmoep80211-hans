@@ -43,7 +43,7 @@
 		((_x) < 0) ? -(_x) : (_x);	\
 	})
 
-#define BIT(x) (1ULL << (x))
+#define BIT(x) (1ULL << (unsigned) (x))
 #define BIT_MASK(x) (BIT(x) - 1)
 
 #if __BYTE_ORDER__ == __LITTLE_ENDIAN
