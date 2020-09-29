@@ -41,12 +41,14 @@
 
 #include "../src/util.h"
 
-static char args_doc[] = "IF1 IF2";
+static char args_doc[] = "IF1 IF2 freq d1 d2 d3 d4";
 
 static char doc[] =
 		"wakeupgen - a wake-up pattern generator\n\n"
 		"  IF1                        Radio interface number 1\n"
-		"  IF2                        Radio interface number 2";
+		"  IF2                        Radio interface number 2\n"
+  		"  freq                       Channel frequency\n"
+	    "  d1, d2, d3, d4             Packet durations in microseconds\n";
 
 enum fix_args {
 	FIX_ARG_IF1 = 0,
@@ -345,11 +347,11 @@ static void rx_handler_work(moep_dev_t dev, moep_frame_t frame)
 		return;
 	}
 
-	if (memcmp(hdr->ra, dst_addr, IEEE80211_ALEN)) {
+	if (memcmp(hdr->ra, dst_addr, IEEE80211_ALEN) != 0) {
 		moep_frame_destroy(frame);
 		return;
 	}
-	if (memcmp(hdr->ta, src_addr, IEEE80211_ALEN)) {
+	if (memcmp(hdr->ta, src_addr, IEEE80211_ALEN) != 0) {
 		moep_frame_destroy(frame);
 		return;
 	}
